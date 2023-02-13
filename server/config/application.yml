@@ -1,0 +1,83 @@
+# Tomcat
+server:
+    tomcat:
+        uri-encoding: UTF-8
+        max-threads: 1000
+        min-spare-threads: 30
+    port: ${SERVER_PORT:8088}
+    connection-timeout: 5000ms
+#    servlet:
+#        context-path: /wx
+
+debug: false
+
+spring:
+## 开发时使用h2db数据库，上线时需要切换到mysql。切换时把下面mysql相关的datasource打开，注释掉h2相关的datasource全部注释掉（包括password下面的几行）。切换到mysql需要手动创建数据库，然后执行resource目录下的sql语句。
+#    datasource:
+#        driver-class-name: com.mysql.cj.jdbc.Driver
+#        url: jdbc:mysql://${MYSQL_IP:localhost}:${MYSQL_PORT:3306}/wx?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+#        username: ${MYSQL_USERNAME:root}
+#        password: ${MYSQL_PASSWORD:123456}
+
+    datasource:
+        driver-class-name: org.h2.Driver
+        url: jdbc:h2:file:./channel_server;AUTO_SERVER=TRUE;MODE=MySQL
+        username: sa
+        password:
+        initialization-mode: always
+        data: classpath:sql/data.sql
+        continue-on-error: true
+
+    # jackson时间格式化
+    jackson:
+        time-zone: GMT+8
+        date-format: yyyy-MM-dd HH:mm
+    servlet:
+        multipart:
+            max-file-size: 100MB
+            max-request-size: 100MB
+            enabled: true
+    mvc:
+        throw-exception-if-no-handler-found: true
+        pathmatch:
+            matching-strategy: ant_path_matcher #解决springboot2.6与swagger兼容性问题
+    task:
+        scheduling:
+            pool:
+                size: 5
+
+
+#mybatis
+mybatis-plus:
+    mapper-locations: classpath*:/mapper/**/*.xml
+    #实体扫描，多个package用逗号或者分号分隔
+    type-aliases-package: com.github.niefy.modules.*.entity
+    type-handlers-package: com.github.niefy.common.handler
+    global-config:
+        #数据库相关配置
+        db-config:
+            #主键类型  AUTO:"数据库ID自增", INPUT:"用户输入ID", ID_WORKER:"全局唯一ID (数字类型唯一ID)", UUID:"全局唯一ID UUID";
+            id-type: AUTO
+            logic-delete-value: -1
+            logic-not-delete-value: 0
+        banner: false
+    #原生配置
+    configuration:
+        map-underscore-to-camel-case: true
+        cache-enabled: true
+        call-setters-on-nulls: true
+        jdbc-type-for-null: 'null'
+
+renren:
+    # APP模块，是通过jwt认证的，如果要使用APP模块，则需要修改【加密秘钥】
+    jwt:
+        # 加密秘钥
+        secret: kF3`eF0|bD0!eA1#gE0!eE3_hD0@kJ0#[niefy@qq.com]
+        # token有效时长，7天，单位秒
+        expire: 604800
+        header: token
+
+springfox:
+    documentation:
+        swagger-ui:
+            enabled: false
